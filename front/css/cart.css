@@ -1,0 +1,111 @@
+/* General Styles */
+body {
+  font-family: 'Arial', sans-serif;
+  background-color: #f2e9e4; /* Light beige background */
+  margin: 0;
+  padding: 0;
+}
+
+/* Header Styles */
+header {
+  background-color: #52301f; /* Dark chocolate brown */
+  color: #fff;
+  padding: 10px;
+  text-align: center;
+}
+
+nav ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+}
+
+nav ul li {
+  margin: 0 10px;
+}
+
+nav ul li a {
+  color: #fff; /* White text */
+  text-decoration: none;
+  font-weight: bold; /* Bold text */
+}
+
+/* Cart Section Styles */
+#cart {
+  padding: 40px 20px;
+  text-align: center;
+}
+
+#cart h2 {
+  margin-bottom: 40px;
+  color: #52301f; /* Dark chocolate brown */
+  font-size: 24px; /* Larger font size for heading */
+}
+
+#cart-items {
+  display: table;
+  width: 100%;
+  border-collapse: collapse; /* Remove gaps between table cells */
+  margin-top: 20px;
+}
+
+.cart-item {
+  display: table-row; /* Each cart item is a table row */
+}
+
+.cart-item > * {
+  display: table-cell; /* Each element within cart-item is a table cell */
+  padding: 10px; /* Add some padding to cells */
+  border-bottom: 1px solid #ddd; /* Add a bottom border to each row */
+}
+
+.cart-item .product-image {
+  width: 100px;
+  height: 100px;
+  object-fit: cover; /* Ensures the image fills the space */
+  margin-bottom: 10px;
+  border-radius: 5px; /* Rounded corners */
+  vertical-align: middle; /* Align image with other cells */
+}
+
+.cart-item .product-name,
+.cart-item .product-quantity,
+.cart-item .product-price {
+  text-align: left; /* Align text to the left */
+}
+
+.cart-total {
+  margin-top: 20px;
+  font-size: 18px;
+  font-weight: bold;
+  color: #99521f; /* Richer brown with a hint of orange */
+  text-align: right; /* Align total price to the right */
+}
+
+#clear-cart {
+  background-color: #99521f; /* Richer brown with a hint of orange */
+  border: none;
+  color: #fff;
+  padding: 10px 20px;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 5px; /* Rounded corners for button */
+  transition: background-color 0.3s ease; /* Smooth transition for hover effect */
+  margin-top: 20px;
+}
+
+#clear-cart:hover {
+  background-color: #7a3f1a; /* Darker brown on hover */
+}
+
+/* Footer Styles */
+footer {
+  background-color: #52301f; /* Dark chocolate brown */
+  color: #fff;
+  padding: 20px;
+  text-align: center;
+}

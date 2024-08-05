@@ -1,0 +1,102 @@
+/* General Styles */
+body {
+  font-family: 'Arial', sans-serif;
+  background-color: #f2e9e4; /* Light beige background */
+  margin: 0;
+  padding: 0;
+}
+
+/* Header Styles */
+header {
+  background-color: #52301f; /* Dark chocolate brown */
+  color: #fff;
+  padding: 10px;
+  text-align: center;
+}
+
+nav ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+}
+
+nav ul li {
+  margin: 0 10px;
+}
+
+nav ul li a {
+  color: #fff; /* White text */
+  text-decoration: none;
+  font-weight: bold; /* Bold text */
+}
+
+/* Product Details Section Styles */
+#product-details {
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.product-container {
+  display: flex; /* Use flexbox for layout */
+  justify-content: center; /* Center the content horizontally */
+  align-items: center; /* Align items vertically */
+  margin-top: 20px;
+}
+
+.product-image {
+  width: 300px; /* Adjust width as needed */
+  height: auto; /* Maintain aspect ratio */
+  margin-right: 40px; /* Add space between image and info */
+  border-radius: 10px; /* Rounded corners */
+}
+
+.product-info {
+  text-align: left; /* Align text to the left */
+}
+
+.product-name {
+  font-size: 24px;
+  margin-bottom: 10px;
+  color: #52301f; /* Dark chocolate brown */
+  font-weight: bold; /* Bold text */
+}
+
+.product-description {
+  margin-bottom: 20px;
+  color: #555; /* Grey text for description */
+  line-height: 1.6; /* Adjust line height for better readability */
+}
+
+.product-price {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  color: #99521f; /* Richer brown with a hint of orange */
+}
+
+.add-to-cart {
+  background-color: #99521f; /* Richer brown with a hint of orange */
+  border: none;
+  color: #fff;
+  padding: 10px 20px;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 5px; /* Rounded corners for button */
+  transition: background-color 0.3s ease; /* Smooth transition for hover effect */
+}
+
+.add-to-cart:hover {
+  background-color: #7a3f1a; /* Darker brown on hover */
+}
+
+/* Footer Styles */
+footer {
+  background-color: #52301f; /* Dark chocolate brown */
+  color: #fff;
+  padding: 20px;
+  text-align: center;
+}

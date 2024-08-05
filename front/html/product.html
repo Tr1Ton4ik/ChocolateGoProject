@@ -1,0 +1,44 @@
+{{define "product"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chocolate Internet Shop - Product</title>
+    <link rel="stylesheet" href="/front/css/product.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="#">Products</a></li>
+                <li><a href="#">About</a></li>
+                <li><a href="#">Contact</a></li>
+                <li><a href="cart.html">Cart</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <section id="product-details">
+            <div class="product-container">
+                <img src=/front/img/{{.Name}}.jpeg alt={{.Name}} class="product-image">
+                <div class="product-info">
+                    <h1 class="product-name">{{.Name}}</h1>
+                    <p class="product-description">{{.Description}}</p>
+                    <p class="product-price">{{.Price}}</p>
+                    <button class="btn add-to-cart" data-name={{.Name}} data-price={{.Price}}>Add to Cart</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2023 Chocolate Internet Shop. All rights reserved.</p>
+    </footer>
+
+    <script src="/front/js/index.js"></script>
+    <script src="/front/js/product.js"></script>
+</body>
+</html>
+{{end}}

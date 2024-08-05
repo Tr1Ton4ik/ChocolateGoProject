@@ -1,0 +1,184 @@
+
+/* General Styles */
+body {
+  font-family: 'Arial', sans-serif;
+  background-color: #f2e9e4; /* Light beige background */
+  margin: 0;
+  padding: 0;
+}
+
+/* Header Styles */
+header {
+  background-color: #52301f; /* Dark chocolate brown */
+  color: #fff;
+  padding: 10px;
+  text-align: center;
+}
+
+nav ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+}
+
+nav ul li {
+  margin: 0 10px;
+}
+
+nav ul li a {
+  color: #fff; /* White text */
+  text-decoration: none;
+  font-weight: bold; /* Bold text */
+}
+
+/* Hero Section Styles */
+#hero {
+  background-image: url('/front/img/hero-image.jpg'); /* Replace with your hero image */
+  background-size: cover;
+  background-position: center;
+  padding: 100px 20px;
+  text-align: center;
+  color: #fff; /* White text for hero */
+}
+
+.hero-content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+#hero h1 {
+  font-size: 36px;
+  margin-bottom: 20px;
+}
+
+#hero p {
+  font-size: 18px;
+  margin-bottom: 40px;
+}
+
+.btn {
+  background-color: #99521f; /* Richer brown with a hint of orange */
+  border: none;
+  color: #fff;
+  padding: 10px 20px;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 5px; /* Rounded corners for button */
+  transition: background-color 0.3s ease; /* Smooth transition for hover effect */
+}
+
+.btn:hover {
+  background-color: #7a3f1a; /* Darker brown on hover */
+}
+
+.category-links {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center; /* Center categories */
+}
+
+.category-link {
+  color: #99521f; /* Richer brown with a hint of orange */
+  text-decoration: none;
+  font-weight: bold; /* Bold text for category links */
+  padding: 5px 10px;
+  border-radius: 5px; /* Rounded corners for category links */
+  transition: background-color 0.3s ease; /* Smooth transition for hover effect */
+}
+
+.category-link:hover {
+  background-color: #f2e9e4; /* Light beige background on hover */
+}
+
+.category-divider {
+  color: #99521f; /* Richer brown with a hint of orange */
+  margin: 0 10px;
+}
+
+/* Featured Products Section Styles */
+#featured-products {
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.featured-products-content {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+#featured-products h2 {
+  margin-bottom: 40px;
+  color: #52301f; /* Dark chocolate brown */
+  font-size: 24px; /* Larger font size for heading */
+}
+
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 0.2fr));
+  grid-gap: 20px;
+}
+
+.product-card {
+  border: 1px solid #ddd;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow for cards */
+  border-radius: 10px; /* Rounded corners for cards */
+  background-color: #f2e9e4; /* Light beige background for cards */
+}
+
+.product-image {
+  width: 100%;
+  max-height: 200px;
+  object-fit: cover;
+  margin-bottom: 10px;
+  border-radius: 10px; /* Rounded corners for images */
+  cursor: pointer; /* Make images clickable */
+}
+
+.product-name {
+  font-size: 18px;
+  margin-bottom: 10px;
+  color: #52301f; /* Dark chocolate brown for product name */
+  font-weight: bold; /* Bold text for product name */
+}
+
+.product-description {
+  margin-bottom: 10px;
+  color: #555; /* Grey text for description */
+}
+
+.product-price {
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: #99521f; /* Richer brown with a hint of orange for price */
+}
+
+.add-to-cart {
+  background-color: #99521f; /* Richer brown with a hint of orange */
+  border: none;
+  color: #fff;
+  padding: 10px 20px;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 5px; /* Rounded corners for button */
+  transition: background-color 0.3s ease; /* Smooth transition for hover effect */
+}
+
+.add-to-cart:hover {
+  background-color: #7a3f1a; /* Darker brown on hover */
+}
+
+/* Footer Styles */
+footer {
+  background-color: #52301f; /* Dark chocolate brown */
+  color: #fff;
+  padding: 20px;
+  text-align: center;
+}

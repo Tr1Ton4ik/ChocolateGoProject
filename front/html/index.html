@@ -1,0 +1,61 @@
+{{define "index"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chocolate Internet Shop</title>
+    <link rel="stylesheet" href="/front/css/index.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="#">Products</a></li>
+                <li><a href="#">About</a></li>
+                <li><a href="#">Contact</a></li>
+                <li><a href="cart.html">Cart</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section id="hero">
+            <h1>Welcome to Chocolate Internet Shop</h1>
+            <p>Discover the best chocolate products online</p>
+            <a href="#featured-products" class="btn">Shop Now</a>
+                <div class="category-links">
+                    {{range .Categories}}
+                    <span class="category-divider">|</span>
+                    <a href="/index.html?category={{.Name}}" class="category-link">{{.Name}}</a>
+                    <span class="category-divider">|</span>
+                    {{end}}
+                </div>
+        </section>
+
+        <section id="featured-products">
+            <h2>Our Products</h2>
+            <div class="product-grid">
+                {{range .Products}}
+                <div class="product-card">
+                    <img src=/front/img/{{.Name}}.jpeg alt={{.Name}} class="product-image" onclick="redirectToProductPage(this)">
+                    <h3 class="product-name">{{.Name}}</h3>
+                    <p class="product-description">{{.Description}}</p>
+                    <p class="product-price">{{.Price}}</p>
+                    <button class="btn add-to-cart" data-name={{.Name}} data-price={{.Price}}>Add to Cart</button>
+                </div>
+                {{end}}
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2023 Chocolate Internet Shop. All rights reserved.</p>
+    </footer>
+
+    <script src="/front/js/index.js"></script>
+</body>
+</html>
+
+{{end}}
