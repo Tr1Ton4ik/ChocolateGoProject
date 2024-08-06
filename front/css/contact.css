@@ -1,0 +1,70 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #F1EDEA; /* Бежевый фон */
+}
+
+header {
+    background-color: #6D4C41; /* Темно-коричневый цвет */
+    color: #fff;
+    padding: 10px;
+}
+
+nav ul {
+    list-style-type: none;
+    display: flex;
+    justify-content: center;
+    margin: 0;
+    padding: 0;
+}
+
+nav li {
+    margin: 0 10px;
+}
+
+nav a {
+    color: #fff;
+    text-decoration: none;
+}
+
+main {
+    padding: 20px;
+}
+
+#contact {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.contact-info {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.contact-item {
+    background-color: #E6CCBC; /* Светло-коричневый цвет */
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.contact-item h3 {
+    color: #6D4C41; /* Темно-коричневый цвет */
+}
+
+.contact-item p {
+    color: #4E342E; /* Темно-коричневый цвет */
+}
+
+footer {
+    background-color: #6D4C41; /* Темно-коричневый цвет */
+    color: #fff;
+    padding: 10px;
+    text-align: center;
+}

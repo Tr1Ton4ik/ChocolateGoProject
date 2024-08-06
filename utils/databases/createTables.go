@@ -1,5 +1,7 @@
 package databases
+
 import "database/sql"
+
 func CreateTables(db *sql.DB) {
 	createChocolateTable(db)
 	createCategoryOfChocolateTable(db)

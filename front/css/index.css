@@ -118,7 +118,7 @@ nav ul li a {
 
 .product-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 0.2fr));
+  grid-template-columns: repeat(5, 1fr);
   grid-gap: 20px;
 }
 

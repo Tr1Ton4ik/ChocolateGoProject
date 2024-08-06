@@ -1,18 +1,19 @@
 package main
 
 import (
+	"chocolateproject/utils"
 	"chocolateproject/utils/databases"
 	"chocolateproject/utils/types"
 	"database/sql"
 	"fmt"
-	_ "github.com/mattn/go-sqlite3"
 	"html/template"
 	"log"
 	"net/http"
-	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
 var db *sql.DB
@@ -32,7 +33,7 @@ func (a *AllForMain) appendCategory(c types.Category) {
 	a.Categories = append(a.Categories, c)
 }
 func main() {
-	go waitForStop()
+	go utils.WaitForStop()
 	db, err = sql.Open("sqlite3", "./db/chocolate.db")
 	if err != nil {
 		panic(err)
@@ -49,6 +50,7 @@ func main() {
 	serverMux.HandleFunc("/", mainPageHandler)
 	serverMux.HandleFunc("/cart.html", cartPageHandler)
 	serverMux.HandleFunc("/product.html", productPageHandler)
+	serverMux.HandleFunc("/contact.html", contactPageHanfler)
 
 	// Запускаем веб-сервер на порту 8080 с нашим serverMux (в прошлых примерах был nil)
 	fmt.Println("Запуск сервера ")
@@ -99,6 +101,15 @@ func productPageHandler(w http.ResponseWriter, r *http.Request) {
 	//выводим шаблон клиенту в браузер
 	tmpl.ExecuteTemplate(w, "product", prepareForProductPage(product_name))
 }
+func contactPageHanfler(w http.ResponseWriter, r *http.Request){
+	path := filepath.Join("front/html/", "contact.html")
+	tmpl, err := template.ParseFiles(path)
+	if err != nil {
+		panic(err)
+	}
+	//выводим шаблон клиенту в браузер
+	tmpl.ExecuteTemplate(w, "contact", nil)
+}
 func prepareForMainPage(categoryForFind string, db *sql.DB) AllForMain {
 	var (
 		id, price, category_id           int64
@@ -128,7 +139,7 @@ func prepareForMainPage(categoryForFind string, db *sql.DB) AllForMain {
 	defer rows.Close()
 	for rows.Next() {
 		rows.Scan(&category_id, &category_name)
-		products.appendCategory(types.Category{Id: int(category_id),Name:  category_name})
+		products.appendCategory(types.Category{Id: int(category_id), Name: category_name})
 	}
 	return products
 }
@@ -179,13 +190,14 @@ func fillCategoryDateTable() {
 		}
 	}
 }
-func waitForStop() {
-	var stop string
-	for {
-		fmt.Scan(&stop)
-		if strings.ToLower(stop) == "s" {
-			fmt.Println("Successfully stopped")
-			os.Exit(0)
-		}
-	}
-}
+
+//func waitForStop() {
+//	var stop string
+//	for {
+//		fmt.Scan(&stop)
+//		if strings.ToLower(stop) == "s" {
+//			fmt.Println("Successfully stopped")
+//			os.Exit(0)
+//		}
+//	}
+//}
