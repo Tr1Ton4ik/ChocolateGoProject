@@ -1,19 +1,19 @@
 package main
 
 import (
-	"chocolateproject/utils"
 	"chocolateproject/utils/databases"
 	"chocolateproject/utils/types"
+	"chocolateproject/utils/commands"
+
 	"database/sql"
 	"fmt"
+	_ "github.com/mattn/go-sqlite3"
 	"html/template"
 	"log"
 	"net/http"
 	"path/filepath"
 	"strconv"
 	"strings"
-
-	_ "github.com/mattn/go-sqlite3"
 )
 
 var db *sql.DB
@@ -33,7 +33,16 @@ func (a *AllForMain) appendCategory(c types.Category) {
 	a.Categories = append(a.Categories, c)
 }
 func main() {
-	go utils.WaitForStop()
+	fmt.Println(`
+Запуск программы
+
+	Справка по пользованию:
+	s - остановка программы
+	nwpdt - добавление нового продукта
+	`)
+
+	go WaitForCommands()
+
 	db, err = sql.Open("sqlite3", "./db/chocolate.db")
 	if err != nil {
 		panic(err)
@@ -51,6 +60,7 @@ func main() {
 	serverMux.HandleFunc("/cart.html", cartPageHandler)
 	serverMux.HandleFunc("/product.html", productPageHandler)
 	serverMux.HandleFunc("/contact.html", contactPageHanfler)
+	serverMux.HandleFunc("/about.html", aboutPageHandler)
 
 	// Запускаем веб-сервер на порту 8080 с нашим serverMux (в прошлых примерах был nil)
 	fmt.Println("Запуск сервера ")
@@ -101,7 +111,7 @@ func productPageHandler(w http.ResponseWriter, r *http.Request) {
 	//выводим шаблон клиенту в браузер
 	tmpl.ExecuteTemplate(w, "product", prepareForProductPage(product_name))
 }
-func contactPageHanfler(w http.ResponseWriter, r *http.Request){
+func contactPageHanfler(w http.ResponseWriter, r *http.Request) {
 	path := filepath.Join("front/html/", "contact.html")
 	tmpl, err := template.ParseFiles(path)
 	if err != nil {
@@ -109,6 +119,15 @@ func contactPageHanfler(w http.ResponseWriter, r *http.Request){
 	}
 	//выводим шаблон клиенту в браузер
 	tmpl.ExecuteTemplate(w, "contact", nil)
+}
+func aboutPageHandler(w http.ResponseWriter, r *http.Request) {
+	path := filepath.Join("front/html/", "about.html")
+	tmpl, err := template.ParseFiles(path)
+	if err != nil {
+		panic(err)
+	}
+	//выводим шаблон клиенту в браузер
+	tmpl.ExecuteTemplate(w, "about", nil)
 }
 func prepareForMainPage(categoryForFind string, db *sql.DB) AllForMain {
 	var (
@@ -190,14 +209,16 @@ func fillCategoryDateTable() {
 		}
 	}
 }
-
-//func waitForStop() {
-//	var stop string
-//	for {
-//		fmt.Scan(&stop)
-//		if strings.ToLower(stop) == "s" {
-//			fmt.Println("Successfully stopped")
-//			os.Exit(0)
-//		}
-//	}
-//}
+func WaitForCommands() {
+	var command string
+	for {
+		fmt.Scan(&command)
+		switch command {
+			case "s":
+				commands.Stop()
+			case "nwpdt":
+				commands.CollectProduct()
+			default: fmt.Println("No such command")
+		}
+	}
+}
