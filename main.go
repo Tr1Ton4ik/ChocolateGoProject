@@ -1,19 +1,20 @@
 package main
 
 import (
+	"chocolateproject/utils/commands"
 	"chocolateproject/utils/databases"
 	"chocolateproject/utils/types"
-	"chocolateproject/utils/commands"
 
 	"database/sql"
 	"fmt"
-	_ "github.com/mattn/go-sqlite3"
 	"html/template"
 	"log"
 	"net/http"
 	"path/filepath"
 	"strconv"
 	"strings"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
 var db *sql.DB
@@ -36,9 +37,9 @@ func main() {
 	fmt.Println(`
 Запуск программы
 
-	Справка по пользованию:
-	s - остановка программы
-	nwpdt - добавление нового продукта
+Справка по пользованию:
+s - остановка программы
+nwpdt - добавление нового продукта
 	`)
 
 	go WaitForCommands()
@@ -214,11 +215,12 @@ func WaitForCommands() {
 	for {
 		fmt.Scan(&command)
 		switch command {
-			case "s":
-				commands.Stop()
-			case "nwpdt":
-				commands.CollectProduct()
-			default: fmt.Println("No such command")
+		case "s":
+			commands.Stop()
+		case "nwpdt":
+			commands.NewProduct()
+		default:
+			fmt.Println("No such command")
 		}
 	}
 }
