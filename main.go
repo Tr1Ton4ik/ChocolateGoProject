@@ -39,7 +39,6 @@ func main() {
 
 Справка по пользованию:
 s - остановка программы
-nwpdt - добавление нового продукта
 	`)
 
 	go WaitForCommands()
@@ -217,8 +216,6 @@ func WaitForCommands() {
 		switch command {
 		case "s":
 			commands.Stop()
-		case "nwpdt":
-			commands.NewProduct()
 		default:
 			fmt.Println("No such command")
 		}
