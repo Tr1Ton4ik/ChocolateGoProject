@@ -1,7 +1,6 @@
 package databases
 
-import ("database/sql"
-		"chocolateproject/config")
+import ("database/sql")
 
 func CreateTables(db *sql.DB) {
 	createChocolateTable(db)
@@ -35,11 +34,6 @@ func createAdminsTable(db *sql.DB){
 	}
 	_, err = stmnt.Exec()
 	if err != nil {
-		panic(err)
-	}
-	stmnt, _ = db.Prepare("INSERT INTO admins (name, password) VALUES (?, ?)")
-	_, err = stmnt.Exec(config.FirstAdmin, config.FirstPassword)
-	if err != nil{
 		panic(err)
 	}
 }

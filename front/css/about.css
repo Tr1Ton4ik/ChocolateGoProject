@@ -32,43 +32,11 @@ body {
     font-weight: bold; /* Bold text */
   }
   
-  /* Contact Section Styles */
-  #contact {
+  /* Content Styles */
+  body > p {
+    text-align: center;
+    color: #52301f; /* Dark chocolate brown */
     padding: 40px 20px;
-    text-align: center;
-  }
-  
-  #contact h1 {
-    margin-bottom: 40px;
-    color: #52301f; /* Dark chocolate brown */
-  }
-  
-  .contact-info {
-    display: flex;
-    justify-content: center;
-    max-width: 800px;
-    margin: 0 auto;
-  }
-  
-  .contact-item {
-    background-color: #f2e9e4; /* Light beige background */
-    border: 1px solid #ddd;
-    padding: 20px;
-    text-align: center;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow for cards */
-    border-radius: 10px; /* Rounded corners for cards */
-    margin: 0 20px;
-    flex: 1;
-  }
-  
-  .contact-item h3 {
-    color: #52301f; /* Dark chocolate brown */
-    margin-bottom: 10px;
-  }
-  
-  .contact-item p {
-    color: #99521f; /* Richer brown with a hint of orange */
-    font-weight: bold;
   }
   
   /* Footer Styles */
@@ -78,4 +46,3 @@ body {
     padding: 20px;
     text-align: center;
   }
-  

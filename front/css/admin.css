@@ -1,0 +1,105 @@
+/* General Styles */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f2e9e4; /* Light beige background */
+    margin: 0;
+    padding: 0;
+  }
+  
+  /* Header Styles */
+  header {
+    background-color: #52301f; /* Dark chocolate brown */
+    color: #fff;
+    padding: 10px;
+    text-align: center;
+  }
+  
+  nav ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+  }
+  
+  nav ul li {
+    margin: 0 10px;
+  }
+  
+  nav ul li a {
+    color: #fff; /* White text */
+    text-decoration: none;
+    font-weight: bold; /* Bold text */
+  }
+  
+  /* Add Product Section Styles */
+  #add-product {
+    padding: 40px 20px;
+    text-align: center;
+  }
+  
+  #add-product h1 {
+    margin-bottom: 40px;
+    color: #52301f; /* Dark chocolate brown */
+  }
+  
+  #product-form {
+    max-width: 600px;
+    margin: 0 auto;
+    background-color: #f2e9e4; /* Light beige background */
+    padding: 30px;
+    border-radius: 10px; /* Rounded corners for form */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow for form */
+  }
+  
+  .form-group {
+    margin-bottom: 20px;
+    text-align: left;
+  }
+  
+  .form-group label {
+    display: block;
+    font-weight: bold;
+    color: #52301f; /* Dark chocolate brown */
+    margin-bottom: 5px;
+  }
+  
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px; /* Rounded corners for inputs */
+    font-size: 16px;
+  }
+  
+  .form-group textarea {
+    height: 100px;
+  }
+  
+  .btn {
+    background-color: #99521f; /* Richer brown with a hint of orange */
+    border: none;
+    color: #fff;
+    padding: 10px 20px;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px; /* Rounded corners for button */
+    transition: background-color 0.3s ease; /* Smooth transition for hover effect */
+  }
+  
+  .btn:hover {
+    background-color: #7a3f1a; /* Darker brown on hover */
+  }
+  
+  /* Footer Styles */
+  footer {
+    background-color: #52301f; /* Dark chocolate brown */
+    color: #fff;
+    padding: 20px;
+    text-align: center;
+  }
+  

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"chocolateproject/config"
 	"chocolateproject/utils/commands"
 	"chocolateproject/utils/databases"
 	"chocolateproject/utils/types"
@@ -48,7 +49,7 @@ s - остановка программы
 		panic(err)
 	}
 	databases.CreateTables(db)
-	//fillAllDatebases() //раскоментить для заполнения бд
+	//fillAllDatabases() //раскоментить для заполнения бд
 
 	serverMux := http.NewServeMux()
 	serverMux.Handle(frontPath+"img/", http.StripPrefix(frontPath+"img/", http.FileServer(http.Dir(strings.Trim(frontPath+"img/", "/")))))
@@ -61,6 +62,9 @@ s - остановка программы
 	serverMux.HandleFunc("/product.html", productPageHandler)
 	serverMux.HandleFunc("/contact.html", contactPageHanfler)
 	serverMux.HandleFunc("/about.html", aboutPageHandler)
+	serverMux.HandleFunc("/admin", adminPageHandler)
+	serverMux.HandleFunc("/login", loginAdminPageHandler)
+	serverMux.HandleFunc("/check_admin", checkAdmin)
 
 	// Запускаем веб-сервер на порту 8080 с нашим serverMux (в прошлых примерах был nil)
 	fmt.Println("Запуск сервера ")
@@ -129,6 +133,48 @@ func aboutPageHandler(w http.ResponseWriter, r *http.Request) {
 	//выводим шаблон клиенту в браузер
 	tmpl.ExecuteTemplate(w, "about", nil)
 }
+func adminPageHandler(w http.ResponseWriter, r *http.Request) {
+	path := filepath.Join("front/html/", "admin.html")
+	tmpl, err := template.ParseFiles(path)
+	if err != nil {
+		panic(err)
+	}
+	//выводим шаблон клиенту в браузер
+	tmpl.ExecuteTemplate(w, "admin", nil)
+}
+func loginAdminPageHandler(w http.ResponseWriter, r *http.Request) {
+	path := filepath.Join("front/html/", "login.html")
+	tmpl, err := template.ParseFiles(path)
+	if err != nil {
+		panic(err)
+	}
+	//выводим шаблон клиенту в браузер
+	tmpl.ExecuteTemplate(w, "login", nil)
+}
+func checkAdmin(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodPost {
+		r.ParseForm()
+		name, password := r.Form.Get("name"), r.Form.Get("password")
+
+		rows, _ := db.Query("select * from admins where (name = (?) AND password = (?))", name, config.Hash(password))
+		i := 0
+		for rows.Next(){
+			i ++
+			break
+		}
+		if i >= 1 {
+			http.SetCookie(w, &http.Cookie{
+				Name:  "isAuthenticated",
+				Value: "true",
+			})
+			http.Redirect(w, r, "/admin", http.StatusFound)
+			fmt.Println(1)
+		} else{
+			fmt.Println(0)
+			http.Redirect(w, r, "/login", http.StatusNotFound)
+		}
+	}
+}
 func prepareForMainPage(categoryForFind string, db *sql.DB) AllForMain {
 	var (
 		id, price, category_id           int64
@@ -177,9 +223,10 @@ func prepareForProductPage(productName string) types.Product {
 	return answer
 }
 
-func fillAllDatebases() {
-	fillProductsDateTable()
-	fillCategoryDateTable()
+func fillAllDatabases() {
+	fillProductsDataTable()
+	fillCategoryDataTable()
+	fillAdminDataTable()
 }
 
 func addChocolate(name string, price int, description string, category_id int) error {
@@ -192,7 +239,7 @@ func addCategory(name string) error {
 	_, err := stmnt.Exec(name)
 	return err
 }
-func fillProductsDateTable() {
+func fillProductsDataTable() {
 	for i := 1; i <= 5; i++ {
 		strFormatI := strconv.Itoa(i)
 		err := addChocolate("name"+strFormatI, i*100, "description"+strFormatI, i)
@@ -201,12 +248,19 @@ func fillProductsDateTable() {
 		}
 	}
 }
-func fillCategoryDateTable() {
+func fillCategoryDataTable() {
 	categories := []string{"Шоколадные плитки", "Батончики", "Конфеты", "Мороженое", "Пасты и карамели"}
 	for _, item := range categories {
 		if err := addCategory(item); err != nil {
 			panic(err)
 		}
+	}
+}
+func fillAdminDataTable() {
+	stmnt, _ := db.Prepare("INSERT INTO admins (name, password) VALUES (?, ?)")
+	_, err = stmnt.Exec(config.FirstAdmin, config.FirstPassword)
+	if err != nil {
+		panic(err)
 	}
 }
 func WaitForCommands() {
