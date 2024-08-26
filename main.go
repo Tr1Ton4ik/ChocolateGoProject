@@ -5,6 +5,7 @@ import (
 	"chocolateproject/utils/commands"
 	"chocolateproject/utils/databases"
 	"chocolateproject/utils/types"
+	"os"
 
 	"database/sql"
 	"fmt"
@@ -17,9 +18,6 @@ import (
 
 	_ "github.com/mattn/go-sqlite3"
 )
-
-var db *sql.DB
-var err error
 
 const frontPath string = "/front/"
 
@@ -41,13 +39,24 @@ func main() {
 Справка по пользованию:
 s - остановка программы
 	`)
-
+	if _, err := os.Stat("./db"); os.IsNotExist(err){
+		fmt.Println("Создаю папку под дб")
+		os.Mkdir("./db", 0755)
+	}
+	if _, err := os.Stat("./db/chocolate.db"); os.IsNotExist(err){
+		fmt.Println("Создаю chocolate.db")
+		os.Chdir("./db")
+		file, _ := os.Create("chocolate.db")
+		file.Close()
+		os.Chdir("../")
+	}
 	go WaitForCommands()
 
-	db, err = sql.Open("sqlite3", "./db/chocolate.db")
+	db, err := sql.Open("sqlite3", "./db/chocolate.db")
 	if err != nil {
 		panic(err)
 	}
+	defer db.Close()
 	databases.CreateTables(db)
 	//fillAllDatabases() //раскоментить для заполнения бд
 
@@ -69,12 +78,19 @@ s - остановка программы
 	// Запускаем веб-сервер на порту 8080 с нашим serverMux (в прошлых примерах был nil)
 	fmt.Println("Запуск сервера ")
 	fmt.Println("Сервер запущен: http://127.0.0.1:8080")
-	err := http.ListenAndServe(":8080", serverMux)
+	err = http.ListenAndServe(":8080", serverMux)
 	if err != nil {
 		log.Fatal("Ошибка запуска сервера:", err)
 	}
 }
 func mainPageHandler(w http.ResponseWriter, r *http.Request) {
+
+	db, err := sql.Open("sqlite3", "./db/chocolate.db")
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
+
 	path := filepath.Join("front/html/", "index.html")
 	//создаем html-шаблон
 	tmpl, err := template.ParseFiles(path)
@@ -152,14 +168,20 @@ func loginAdminPageHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl.ExecuteTemplate(w, "login", nil)
 }
 func checkAdmin(w http.ResponseWriter, r *http.Request) {
+	db, err := sql.Open("sqlite3", "./db/chocolate.db")
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
+
 	if r.Method == http.MethodPost {
 		r.ParseForm()
 		name, password := r.Form.Get("name"), r.Form.Get("password")
 
 		rows, _ := db.Query("select * from admins where (name = (?) AND password = (?))", name, config.Hash(password))
 		i := 0
-		for rows.Next(){
-			i ++
+		for rows.Next() {
+			i++
 			break
 		}
 		if i >= 1 {
@@ -168,9 +190,7 @@ func checkAdmin(w http.ResponseWriter, r *http.Request) {
 				Value: "true",
 			})
 			http.Redirect(w, r, "/admin", http.StatusFound)
-			fmt.Println(1)
-		} else{
-			fmt.Println(0)
+		} else {
 			http.Redirect(w, r, "/login", http.StatusNotFound)
 		}
 	}
@@ -209,6 +229,11 @@ func prepareForMainPage(categoryForFind string, db *sql.DB) AllForMain {
 	return products
 }
 func prepareForProductPage(productName string) types.Product {
+	db, err := sql.Open("sqlite3", "./db/chocolate.db")
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
 	var (
 		id, price, category_id           int
 		name, description, category_name string
@@ -230,13 +255,23 @@ func fillAllDatabases() {
 }
 
 func addChocolate(name string, price int, description string, category_id int) error {
+	db, err := sql.Open("sqlite3", "./db/chocolate.db")
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
 	stmnt, _ := db.Prepare("INSERT INTO chocolate (name, price, description, category_id) VALUES (?,?,?,?)")
-	_, err := stmnt.Exec(name, price, description, category_id)
+	_, err = stmnt.Exec(name, price, description, category_id)
 	return err
 }
 func addCategory(name string) error {
+	db, err := sql.Open("sqlite3", "./db/chocolate.db")
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
 	stmnt, _ := db.Prepare("INSERT INTO categories (name) VALUES (?)")
-	_, err := stmnt.Exec(name)
+	_, err = stmnt.Exec(name)
 	return err
 }
 func fillProductsDataTable() {
@@ -257,6 +292,11 @@ func fillCategoryDataTable() {
 	}
 }
 func fillAdminDataTable() {
+	db, err := sql.Open("sqlite3", "./db/chocolate.db")
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
 	stmnt, _ := db.Prepare("INSERT INTO admins (name, password) VALUES (?, ?)")
 	_, err = stmnt.Exec(config.FirstAdmin, config.FirstPassword)
 	if err != nil {

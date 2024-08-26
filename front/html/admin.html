@@ -5,10 +5,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Добавить продукт - Шоколадный интернет-магазин</title>
+    <title>Администратор - Шоколадный интернет-магазин</title>
     <link rel="stylesheet" href="/front/css/admin.css">
 </head>
-
 
 <body>
     <script>
@@ -17,39 +16,67 @@
             let cookie = document.cookie.split('; ').find(row => row.startsWith(name + '='));
             return cookie ? cookie.split('=')[1] : null;
         }
-        if (!localStorage.getCookie('isAuthenticated')) {
+
+        if (getCookie('isAuthenticated') !== "true") {
             window.location.href = '/login';
         }
     </script>
 
     <main>
+        <nav>
+            <ul>
+                <li><a href="#add-product">Добавить продукт</a></li>
+                <li><a href="#add-admin">Добавить администратора</a></li>
+                <li><a href="#delete-product">Удалить продукт</a></li>
+            </ul>
+        </nav>
+
+        <!-- Раздел для добавления продукта -->
         <section id="add-product">
-            <h1>Add New Product</h1>
-            <form id="product-form">
+            <h1>Добавить новый продукт</h1>
+            <form id="product-form" enctype="multipart/form-data" method="POST" action="/add_product">
                 <div class="form-group">
-                    <label for="name">Name:</label>
+                    <label for="name">Название:</label>
                     <input type="text" id="name" name="name" required>
                 </div>
                 <div class="form-group">
-                    <label for="category">Category:</label>
+                    <label for="category">Категория:</label>
                     <select id="category" name="category" required>
-                        <option value="">Select a category</option>
-                        <option value="dark-chocolate">Dark Chocolate</option>
-                        <option value="milk-chocolate">Milk Chocolate</option>
-                        <option value="white-chocolate">White Chocolate</option>
-                        <option value="truffles">Truffles</option>
-                        <option value="bars">Chocolate Bars</option>
+                        <option value="">Выберите категорию</option>
+                        {{range .}}
+                        <option value={{.}}>{{.}}</option>
+                        {{end}}
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="description">Description:</label>
+                    <label for="description">Описание:</label>
                     <textarea id="description" name="description" required></textarea>
                 </div>
                 <div class="form-group">
-                    <label for="price">Price:</label>
+                    <label for="price">Цена:</label>
                     <input type="number" id="price" name="price" step="0.01" required>
                 </div>
-                <button type="submit" class="btn">Add Product</button>
+                <div class="form-group">
+                    <label for="image">Изображение:</label>
+                    <input type="file" id="image" name="image" accept="image/*" required>
+                </div>
+                <button type="submit" class="btn">Добавить продукт</button>
+            </form>
+        </section>
+
+        <!-- Раздел для добавления администратора -->
+        <section id="add-admin" style="display: none;">
+            <h1>Добавить администратора</h1>
+            <form id="admin-form" method="POST" action="/add_admin">
+                <!-- Форма для добавления администратора -->
+            </form>
+        </section>
+
+        <!-- Раздел для удаления продукта -->
+        <section id="delete-product" style="display: none;">
+            <h1>Удалить продукт</h1>
+            <form id="delete-form" method="POST" action="/delete_product">
+                <!-- Форма для удаления продукта -->
             </form>
         </section>
     </main>
