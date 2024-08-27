@@ -5,13 +5,14 @@ import (
 	"chocolateproject/utils/commands"
 	"chocolateproject/utils/databases"
 	"chocolateproject/utils/types"
-	"os"
 
 	"database/sql"
 	"fmt"
 	"html/template"
+	"io"
 	"log"
 	"net/http"
+	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -39,11 +40,11 @@ func main() {
 Справка по пользованию:
 s - остановка программы
 	`)
-	if _, err := os.Stat("./db"); os.IsNotExist(err){
+	if _, err := os.Stat("./db"); os.IsNotExist(err) {
 		fmt.Println("Создаю папку под дб")
 		os.Mkdir("./db", 0755)
 	}
-	if _, err := os.Stat("./db/chocolate.db"); os.IsNotExist(err){
+	if _, err := os.Stat("./db/chocolate.db"); os.IsNotExist(err) {
 		fmt.Println("Создаю chocolate.db")
 		os.Chdir("./db")
 		file, _ := os.Create("chocolate.db")
@@ -52,12 +53,7 @@ s - остановка программы
 	}
 	go WaitForCommands()
 
-	db, err := sql.Open("sqlite3", "./db/chocolate.db")
-	if err != nil {
-		panic(err)
-	}
-	defer db.Close()
-	databases.CreateTables(db)
+	databases.CreateTables()
 	//fillAllDatabases() //раскоментить для заполнения бд
 
 	serverMux := http.NewServeMux()
@@ -73,12 +69,11 @@ s - остановка программы
 	serverMux.HandleFunc("/about.html", aboutPageHandler)
 	serverMux.HandleFunc("/admin", adminPageHandler)
 	serverMux.HandleFunc("/login", loginAdminPageHandler)
-	serverMux.HandleFunc("/check_admin", checkAdmin)
 
 	// Запускаем веб-сервер на порту 8080 с нашим serverMux (в прошлых примерах был nil)
 	fmt.Println("Запуск сервера ")
 	fmt.Println("Сервер запущен: http://127.0.0.1:8080")
-	err = http.ListenAndServe(":8080", serverMux)
+	err := http.ListenAndServe(":8080", serverMux)
 	if err != nil {
 		log.Fatal("Ошибка запуска сервера:", err)
 	}
@@ -150,31 +145,65 @@ func aboutPageHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl.ExecuteTemplate(w, "about", nil)
 }
 func adminPageHandler(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodPost:
+		file, _, err := r.FormFile("image")
+		if err != nil {
+			panic(err)
+		}
+		defer file.Close()
+
+		// Сохраняем файл на диск
+		r.ParseForm()
+		name, price_str, description, category := r.Form.Get("name"), r.Form.Get("price"), r.Form.Get("description"), r.Form.Get("category")
+		price, _ := strconv.Atoi(price_str)
+		fileName := "./front/img/" + name + ".jpeg"
+		f, err := os.Create(fileName)
+		if err != nil {
+			panic(err)
+		}
+		defer f.Close()
+
+		_, err = io.Copy(f, file)
+		if err != nil {
+			panic(err)
+		}
+
+		err = addChocolate(name, price, description, category)
+		if err != nil {
+			panic(err)
+		} else {
+			fmt.Println("Продукт", name, "добавлен")
+		}
+	}
 	path := filepath.Join("front/html/", "admin.html")
 	tmpl, err := template.ParseFiles(path)
 	if err != nil {
 		panic(err)
 	}
 	//выводим шаблон клиенту в браузер
-	tmpl.ExecuteTemplate(w, "admin", nil)
-}
-func loginAdminPageHandler(w http.ResponseWriter, r *http.Request) {
-	path := filepath.Join("front/html/", "login.html")
-	tmpl, err := template.ParseFiles(path)
-	if err != nil {
-		panic(err)
-	}
-	//выводим шаблон клиенту в браузер
-	tmpl.ExecuteTemplate(w, "login", nil)
-}
-func checkAdmin(w http.ResponseWriter, r *http.Request) {
 	db, err := sql.Open("sqlite3", "./db/chocolate.db")
 	if err != nil {
 		panic(err)
 	}
 	defer db.Close()
+	categories, category := []string{}, ""
+	rows, _ := db.Query("select name from categories")
+	for rows.Next() {
+		rows.Scan(&category)
+		categories = append(categories, category)
+	}
+	tmpl.ExecuteTemplate(w, "admin", categories)
+}
+func loginAdminPageHandler(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodPost:
+		db, err := sql.Open("sqlite3", "./db/chocolate.db")
+		if err != nil {
+			panic(err)
+		}
+		defer db.Close()
 
-	if r.Method == http.MethodPost {
 		r.ParseForm()
 		name, password := r.Form.Get("name"), r.Form.Get("password")
 
@@ -190,10 +219,15 @@ func checkAdmin(w http.ResponseWriter, r *http.Request) {
 				Value: "true",
 			})
 			http.Redirect(w, r, "/admin", http.StatusFound)
-		} else {
-			http.Redirect(w, r, "/login", http.StatusNotFound)
 		}
 	}
+	path := filepath.Join("front/html/", "login.html")
+	tmpl, err := template.ParseFiles(path)
+	if err != nil {
+		panic(err)
+	}
+	//выводим шаблон клиенту в браузер
+	tmpl.ExecuteTemplate(w, "login", nil)
 }
 func prepareForMainPage(categoryForFind string, db *sql.DB) AllForMain {
 	var (
@@ -249,17 +283,24 @@ func prepareForProductPage(productName string) types.Product {
 }
 
 func fillAllDatabases() {
-	fillProductsDataTable()
 	fillCategoryDataTable()
 	fillAdminDataTable()
 }
 
-func addChocolate(name string, price int, description string, category_id int) error {
+func addChocolate(name string, price int, description string, category string) error {
 	db, err := sql.Open("sqlite3", "./db/chocolate.db")
 	if err != nil {
 		panic(err)
 	}
 	defer db.Close()
+
+	var category_id int
+	rows, _ := db.Query("select id from categories where name==(?)", category)
+	for rows.Next() {
+		rows.Scan(&category_id)
+		break
+	}
+
 	stmnt, _ := db.Prepare("INSERT INTO chocolate (name, price, description, category_id) VALUES (?,?,?,?)")
 	_, err = stmnt.Exec(name, price, description, category_id)
 	return err
@@ -273,15 +314,6 @@ func addCategory(name string) error {
 	stmnt, _ := db.Prepare("INSERT INTO categories (name) VALUES (?)")
 	_, err = stmnt.Exec(name)
 	return err
-}
-func fillProductsDataTable() {
-	for i := 1; i <= 5; i++ {
-		strFormatI := strconv.Itoa(i)
-		err := addChocolate("name"+strFormatI, i*100, "description"+strFormatI, i)
-		if err != nil {
-			panic(err)
-		}
-	}
 }
 func fillCategoryDataTable() {
 	categories := []string{"Шоколадные плитки", "Батончики", "Конфеты", "Мороженое", "Пасты и карамели"}
