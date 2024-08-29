@@ -1,13 +1,10 @@
 package databases
 
-import ("database/sql")
+import (
+	"database/sql"
+)
 
-func CreateTables() {
-	db, err := sql.Open("sqlite3", "./db/chocolate.db")
-	if err != nil {
-		panic(err)
-	}
-	defer db.Close()
+func CreateTables(db *sql.DB) {
 	createChocolateTable(db)
 	createCategoryOfChocolateTable(db)
 	createAdminsTable(db)

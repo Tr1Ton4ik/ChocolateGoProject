@@ -16,11 +16,14 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 
 	_ "github.com/mattn/go-sqlite3"
 )
 
 const frontPath string = "/front/"
+
+var db, err = sql.Open("sqlite3", "./db/chocolate.db")
 
 type AllForMain struct {
 	Products   []types.Product
@@ -39,6 +42,7 @@ func main() {
 
 Справка по пользованию:
 s - остановка программы
+filldb - заполнение бд
 	`)
 	if _, err := os.Stat("./db"); os.IsNotExist(err) {
 		fmt.Println("Создаю папку под дб")
@@ -53,8 +57,7 @@ s - остановка программы
 	}
 	go WaitForCommands()
 
-	databases.CreateTables()
-	//fillAllDatabases() //раскоментить для заполнения бд
+	databases.CreateTables(db)
 
 	serverMux := http.NewServeMux()
 	serverMux.Handle(frontPath+"img/", http.StripPrefix(frontPath+"img/", http.FileServer(http.Dir(strings.Trim(frontPath+"img/", "/")))))
@@ -69,6 +72,9 @@ s - остановка программы
 	serverMux.HandleFunc("/about.html", aboutPageHandler)
 	serverMux.HandleFunc("/admin", adminPageHandler)
 	serverMux.HandleFunc("/login", loginAdminPageHandler)
+	serverMux.HandleFunc("/add_product", addProductHandler)
+	serverMux.HandleFunc("/add_admin", addAdminHandler)
+	//serverMux.HandleFunc("/delete_product", deleteProductHandler)
 
 	// Запускаем веб-сервер на порту 8080 с нашим serverMux (в прошлых примерах был nil)
 	fmt.Println("Запуск сервера ")
@@ -79,12 +85,6 @@ s - остановка программы
 	}
 }
 func mainPageHandler(w http.ResponseWriter, r *http.Request) {
-
-	db, err := sql.Open("sqlite3", "./db/chocolate.db")
-	if err != nil {
-		panic(err)
-	}
-	defer db.Close()
 
 	path := filepath.Join("front/html/", "index.html")
 	//создаем html-шаблон
@@ -145,48 +145,12 @@ func aboutPageHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl.ExecuteTemplate(w, "about", nil)
 }
 func adminPageHandler(w http.ResponseWriter, r *http.Request) {
-	switch r.Method {
-	case http.MethodPost:
-		file, _, err := r.FormFile("image")
-		if err != nil {
-			panic(err)
-		}
-		defer file.Close()
-
-		// Сохраняем файл на диск
-		r.ParseForm()
-		name, price_str, description, category := r.Form.Get("name"), r.Form.Get("price"), r.Form.Get("description"), r.Form.Get("category")
-		price, _ := strconv.Atoi(price_str)
-		fileName := "./front/img/" + name + ".jpeg"
-		f, err := os.Create(fileName)
-		if err != nil {
-			panic(err)
-		}
-		defer f.Close()
-
-		_, err = io.Copy(f, file)
-		if err != nil {
-			panic(err)
-		}
-
-		err = addChocolate(name, price, description, category)
-		if err != nil {
-			panic(err)
-		} else {
-			fmt.Println("Продукт", name, "добавлен")
-		}
-	}
 	path := filepath.Join("front/html/", "admin.html")
 	tmpl, err := template.ParseFiles(path)
 	if err != nil {
 		panic(err)
 	}
 	//выводим шаблон клиенту в браузер
-	db, err := sql.Open("sqlite3", "./db/chocolate.db")
-	if err != nil {
-		panic(err)
-	}
-	defer db.Close()
 	categories, category := []string{}, ""
 	rows, _ := db.Query("select name from categories")
 	for rows.Next() {
@@ -198,11 +162,6 @@ func adminPageHandler(w http.ResponseWriter, r *http.Request) {
 func loginAdminPageHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodPost:
-		db, err := sql.Open("sqlite3", "./db/chocolate.db")
-		if err != nil {
-			panic(err)
-		}
-		defer db.Close()
 
 		r.ParseForm()
 		name, password := r.Form.Get("name"), r.Form.Get("password")
@@ -229,6 +188,96 @@ func loginAdminPageHandler(w http.ResponseWriter, r *http.Request) {
 	//выводим шаблон клиенту в браузер
 	tmpl.ExecuteTemplate(w, "login", nil)
 }
+func addProductHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "POST" {
+		file, _, err := r.FormFile("image")
+		if err != nil {
+			panic(err)
+		}
+		defer file.Close()
+
+		// Сохраняем файл на диск
+		r.ParseForm()
+		name, price_str, description, category := r.Form.Get("name"), r.Form.Get("price"), r.Form.Get("description"), r.Form.Get("category")
+		price, _ := strconv.Atoi(price_str)
+		fileName := "./front/img/" + name + ".jpeg"
+		f, err := os.Create(fileName)
+		if err != nil {
+			panic(err)
+		}
+		defer f.Close()
+
+		_, err = io.Copy(f, file)
+		if err != nil {
+			panic(err)
+		}
+
+		for i := 0; i < 5; i++ { // Пытаемся 5 раз выполнить операцию
+			tx, err := db.Begin()
+			if err != nil {
+				http.Error(w, "Ошибка начала транзакции", http.StatusInternalServerError)
+				return
+			}
+			err = addChocolate(name, price, description, category, tx)
+			if err != nil {
+				if strings.Contains(err.Error(), "database is locked") {
+					tx.Rollback()
+					time.Sleep(100 * time.Millisecond) // Ждем 100 мс перед повторной попыткой
+					continue
+				}
+				http.Error(w, "Ошибка добавления продукта", http.StatusInternalServerError)
+				tx.Rollback()
+			}
+
+			err = tx.Commit()
+			if err == nil {
+				fmt.Println("Добавлен продукт", name)
+				http.Redirect(w, r, "/admin", http.StatusSeeOther)
+				return
+			}
+		}
+		fmt.Print(err)
+		http.Error(w, "Не удалось добавить продукт после 5 попыток", http.StatusInternalServerError)
+	} else {
+		http.Redirect(w, r, "/admin", http.StatusSeeOther)
+	}
+}
+func addAdminHandler(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+	name, password := r.Form.Get("name"), config.Hash(r.Form.Get("password"))
+
+	tx, err := db.Begin()
+	if err != nil {
+		fmt.Println("Ошибка создания транзакции")
+	}
+	for i := 0; i < 5; i++ {
+		err = addAdmin(name, password, tx)
+		if err == nil {
+			err = tx.Commit()
+			if err == nil {
+				fmt.Println("Добавлен администратор", name)
+				http.Redirect(w, r, "/admin", http.StatusSeeOther)
+				return
+			} else {
+				fmt.Println("Ошибка сохранения изменений addadminhandler, попрбую снова")
+			}
+		} else {
+			fmt.Println("Ошибка добавления администратора addadminhandler, попрбую снова")
+		}
+	}
+
+}
+//func deleteProductHandler(w http.ResponseWriter, r *http.Request) {
+//	r.ParseForm()
+//	name, category, password := r.Form.Get("product-name"), r.Form.Get("product-category"), config.Hash(r.Form.Get("password"))
+//	var category_id int
+//	tx, err := db.Begin()
+//	if err != nil {
+//		fmt.Println("Ошибка начала транзакции deleteProductHandler")
+//		return
+//	}
+//
+//}
 func prepareForMainPage(categoryForFind string, db *sql.DB) AllForMain {
 	var (
 		id, price, category_id           int64
@@ -263,11 +312,7 @@ func prepareForMainPage(categoryForFind string, db *sql.DB) AllForMain {
 	return products
 }
 func prepareForProductPage(productName string) types.Product {
-	db, err := sql.Open("sqlite3", "./db/chocolate.db")
-	if err != nil {
-		panic(err)
-	}
-	defer db.Close()
+
 	var (
 		id, price, category_id           int
 		name, description, category_name string
@@ -283,57 +328,76 @@ func prepareForProductPage(productName string) types.Product {
 }
 
 func fillAllDatabases() {
+	fmt.Println("Заполняю бд")
 	fillCategoryDataTable()
 	fillAdminDataTable()
+	fmt.Println("Бд заполнена")
 }
 
-func addChocolate(name string, price int, description string, category string) error {
-	db, err := sql.Open("sqlite3", "./db/chocolate.db")
-	if err != nil {
-		panic(err)
-	}
-	defer db.Close()
-
+func addChocolate(name string, price int, description string, category string, tx *sql.Tx) error {
 	var category_id int
-	rows, _ := db.Query("select id from categories where name==(?)", category)
+	rows, err := tx.Query("SELECT id from categories where name==(?)", category)
 	for rows.Next() {
 		rows.Scan(&category_id)
 		break
 	}
-
-	stmnt, _ := db.Prepare("INSERT INTO chocolate (name, price, description, category_id) VALUES (?,?,?,?)")
-	_, err = stmnt.Exec(name, price, description, category_id)
+	if err != nil {
+		return err
+	}
+	_, err = tx.Exec("INSERT INTO chocolate (name, description, price, category_id) VALUES (?, ?, ?, ?)", name, description, price, category_id)
 	return err
 }
-func addCategory(name string) error {
-	db, err := sql.Open("sqlite3", "./db/chocolate.db")
-	if err != nil {
-		panic(err)
-	}
-	defer db.Close()
-	stmnt, _ := db.Prepare("INSERT INTO categories (name) VALUES (?)")
-	_, err = stmnt.Exec(name)
+func addCategory(name string, tx *sql.Tx) error {
+	_, err = tx.Exec("INSERT INTO categories (name) VALUES (?)", name)
+	return err
+}
+func addAdmin(name string, password string, tx *sql.Tx) error {
+	_, err = tx.Exec("INSERT INTO admins (name, password) VALUES (?, ?)", name, password)
 	return err
 }
 func fillCategoryDataTable() {
-	categories := []string{"Шоколадные плитки", "Батончики", "Конфеты", "Мороженое", "Пасты и карамели"}
-	for _, item := range categories {
-		if err := addCategory(item); err != nil {
-			panic(err)
+	tx, err := db.Begin()
+	if err != nil {
+		fmt.Println("Ошибка начала транзакции fillcategory")
+	}
+	for i := 0; i < 5; i++ {
+		categories := []string{"Шоколадные плитки", "Батончики", "Конфеты", "Мороженое", "Пасты и карамели"}
+		for _, item := range categories {
+			err := addCategory(item, tx)
+			if err != nil {
+				fmt.Println("Ошибка при выполнении операции addcategory, пытаюсь еще раз")
+				tx.Rollback()
+			}
+		if err == nil {
+			break
+		}
 		}
 	}
+	err = tx.Commit()
+	if err != nil {
+		fmt.Println("Ошибка сохранения изменений fillcategorydatabase")
+		return
+	}
+	fmt.Println("Таблица категорий заполнена")
 }
 func fillAdminDataTable() {
-	db, err := sql.Open("sqlite3", "./db/chocolate.db")
+	tx, err := db.Begin()
 	if err != nil {
-		panic(err)
+		fmt.Println("Ошибка начала транзакции filladmindatatable")
 	}
-	defer db.Close()
-	stmnt, _ := db.Prepare("INSERT INTO admins (name, password) VALUES (?, ?)")
-	_, err = stmnt.Exec(config.FirstAdmin, config.FirstPassword)
-	if err != nil {
-		panic(err)
+	for i := 0; i < 5; i++ {
+		_, err = tx.Exec("INSERT INTO admins (name, password) VALUES (?, ?)", config.FirstAdmin, config.FirstPassword)
+		if err == nil {
+			break
+		}
+		fmt.Println("Ошибка выполнения операции filladmindatatable, пытаюсь еще раз")
 	}
+	err = tx.Commit()
+	if err == nil {
+		fmt.Println("Таблица админов заполнена")
+		return
+	}
+	fmt.Println("Ошибка сохранения изменений filladmindatatable")
 }
 func WaitForCommands() {
 	var command string
@@ -342,6 +406,8 @@ func WaitForCommands() {
 		switch command {
 		case "s":
 			commands.Stop()
+		case "filldb":
+			fillAllDatabases()
 		default:
 			fmt.Println("No such command")
 		}

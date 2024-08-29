@@ -34,7 +34,7 @@
         <!-- Раздел для добавления продукта -->
         <section id="add-product">
             <h1>Добавить новый продукт</h1>
-            <form id="product-form" enctype="multipart/form-data" method="POST" action="/admin">
+            <form id="product-form" enctype="multipart/form-data" method="POST" action="/add_product">
                 <div class="form-group">
                     <label for="name">Название:</label>
                     <input type="text" id="name" name="name" required>
@@ -69,6 +69,21 @@
             <h1>Добавить администратора</h1>
             <form id="admin-form" method="POST" action="/add_admin">
                 <!-- Форма для добавления администратора -->
+                <form id="admin-form" method="POST" action="/add_admin">
+                    <div class="form-group">
+                        <label for="name">Имя:</label>
+                        <input type="text" id="name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Пароль:</label>
+                        <input type="password" id="password" name="password" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirm-password">Подтверждение пароля:</label>
+                        <input type="password" id="confirm-password" name="confirm-password" required>
+                    </div>
+                    <button type="submit" class="btn">Добавить администратора</button>
+                </form>
             </form>
         </section>
 
@@ -77,6 +92,22 @@
             <h1>Удалить продукт</h1>
             <form id="delete-form" method="POST" action="/delete_product">
                 <!-- Форма для удаления продукта -->
+                <form id="delete-form" method="POST" action="/delete_product">
+                    <div class="form-group">
+                        <label for="product-name">Название товара:</label>
+                        <input type="text" id="product-name" name="product-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="category">Категория:</label>
+                        <select id="category" name="category" required>
+                            <option value="">Выберите категорию</option>
+                            {{range .}}
+                            <option value={{.}}>{{.}}</option>
+                            {{end}}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn">Удалить товар</button>
+                </form>                
             </form>
         </section>
     </main>
