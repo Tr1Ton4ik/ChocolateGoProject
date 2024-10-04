@@ -80,12 +80,8 @@ filldb - заполнение бд
 
 	// Запускаем веб-сервер на порту 8080 с нашим serverMux (в прошлых примерах был nil)
 	fmt.Println("Запуск сервера ")
-	APP_IP := os.Getenv("APP_IP")
-    APP_PORT := os.Getenv("APP_PORT")
-
-	fmt.Println("Сервер запущен: ", APP_IP+":"+APP_PORT)
-	
-	err := http.ListenAndServe(APP_IP+":"+APP_PORT, serverMux)
+	fmt.Println("Сервер запущен: localhost:8080")
+	err := http.ListenAndServe("localhost:8080", serverMux)
 	if err != nil {
 		log.Fatal("Ошибка запуска сервера:", err)
 	}
