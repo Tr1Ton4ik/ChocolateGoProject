@@ -1,14 +1,16 @@
 /* General Styles */
 body {
   font-family: 'Arial', sans-serif;
-  background-color: #f2e9e4; /* Light beige background */
+  background-color: #f2e9e4;
+  /* Light beige background */
   margin: 0;
   padding: 0;
 }
 
 /* Header Styles */
 header {
-  background-color: #52301f; /* Dark chocolate brown */
+  background-color: #52301f;
+  /* Dark chocolate brown */
   color: #fff;
   padding: 10px;
   text-align: center;
@@ -27,33 +29,38 @@ nav ul li {
 }
 
 nav ul li a {
-  color: #fff; /* White text */
+  color: #fff;
+  /* White text */
   text-decoration: none;
-  font-weight: bold; /* Bold text */
+  font-weight: bold;
+  /* Bold text */
 }
 
 /* Tabs Styles */
 nav a {
   display: block;
   padding: 10px 20px;
-  background-color: #99521f; /* Richer brown with a hint of orange */
+  background-color: #99521f;
+  /* Richer brown with a hint of orange */
   color: #fff;
   text-decoration: none;
-  border-radius: 5px 5px 0 0; /* Rounded corners for tab */
+  border-radius: 5px 5px 0 0;
+  /* Rounded corners for tab */
   transition: background-color 0.3s ease;
 }
 
 nav a:hover {
-  background-color: #7a3f1a; /* Darker brown on hover */
+  background-color: #7a3f1a;
+  /* Darker brown on hover */
 }
 
-main > section {
+main>section {
   display: none;
   padding: 40px 20px;
   text-align: center;
 }
 
-main > section.active {
+main>section.active {
   display: block;
 }
 
@@ -62,7 +69,8 @@ main > section.active {
 #add-admin h1,
 #delete-product h1 {
   margin-bottom: 40px;
-  color: #52301f; /* Dark chocolate brown */
+  color: #52301f;
+  /* Dark chocolate brown */
 }
 
 #product-form,
@@ -70,10 +78,13 @@ main > section.active {
 #delete-form {
   max-width: 600px;
   margin: 0 auto;
-  background-color: #f2e9e4; /* Light beige background */
+  background-color: #f2e9e4;
+  /* Light beige background */
   padding: 30px;
-  border-radius: 10px; /* Rounded corners for form */
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow for form */
+  border-radius: 10px;
+  /* Rounded corners for form */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  /* Subtle shadow for form */
 }
 
 .form-group {
@@ -84,7 +95,8 @@ main > section.active {
 .form-group label {
   display: block;
   font-weight: bold;
-  color: #52301f; /* Dark chocolate brown */
+  color: #52301f;
+  /* Dark chocolate brown */
   margin-bottom: 5px;
 }
 
@@ -94,7 +106,8 @@ main > section.active {
   width: 100%;
   padding: 10px;
   border: 1px solid #ddd;
-  border-radius: 5px; /* Rounded corners for inputs */
+  border-radius: 5px;
+  /* Rounded corners for inputs */
   font-size: 16px;
 }
 
@@ -103,7 +116,8 @@ main > section.active {
 }
 
 .btn {
-  background-color: #99521f; /* Richer brown with a hint of orange */
+  background-color: #99521f;
+  /* Richer brown with a hint of orange */
   border: none;
   color: #fff;
   padding: 10px 20px;
@@ -111,18 +125,27 @@ main > section.active {
   display: inline-block;
   font-size: 16px;
   cursor: pointer;
-  border-radius: 5px; /* Rounded corners for button */
-  transition: background-color 0.3s ease; /* Smooth transition for hover effect */
+  border-radius: 5px;
+  /* Rounded corners for button */
+  transition: background-color 0.3s ease;
+  /* Smooth transition for hover effect */
 }
 
 .btn:hover {
-  background-color: #7a3f1a; /* Darker brown on hover */
+  background-color: #7a3f1a;
+  /* Darker brown on hover */
 }
 
 /* Footer Styles */
 footer {
-  background-color: #52301f; /* Dark chocolate brown */
+  background-color: #52301f;
+  /* Dark chocolate brown */
   color: #fff;
   padding: 20px;
   text-align: center;
+}
+
+#logout-btn {
+  position: absolute;
+  right: 20px;
 }

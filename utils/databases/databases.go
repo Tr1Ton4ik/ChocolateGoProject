@@ -2,43 +2,38 @@ package databases
 
 import (
 	"database/sql"
+	"fmt"
 )
 
 func CreateTables(db *sql.DB) {
-	createChocolateTable(db)
-	createCategoryOfChocolateTable(db)
-	createAdminsTable(db)
+	tx, err := db.Begin()
+	if err != nil {
+		fmt.Println("Ошибка при создании транзакции: ", err)
+	}
+	createChocolateTable(tx)
+	createCategoryOfChocolateTable(tx)
+	createAdminsTable(tx)
+
+	err = tx.Commit()
+	if err!= nil {
+        fmt.Println("Ошибка при сохранении изменений в базу CreateTables:", err)
+    }
 }
-func createChocolateTable(db *sql.DB) {
-	stmnt, err := db.Prepare("CREATE TABLE IF NOT EXISTS chocolate (id INTEGER PRIMARY KEY, name TEXT, price INTEGER, description TEXT, category_id INTEGER, FOREIGN KEY (category_id) REFERENCES categories (id))")
+func createChocolateTable(tx *sql.Tx) {
+	_, err := tx.Exec("CREATE TABLE IF NOT EXISTS chocolate (id INTEGER PRIMARY KEY, name TEXT, price INTEGER, description TEXT, category_id INTEGER, FOREIGN KEY (category_id) REFERENCES categories (id))")
 	if err != nil {
-		panic(err)
-	}
-	defer stmnt.Close()
-	_, err = stmnt.Exec()
-	if err != nil {
-		panic(err)
-	}
-}
-func createCategoryOfChocolateTable(db *sql.DB) {
-	stmnt, err := db.Prepare("CREATE TABLE IF NOT EXISTS categories (id INTEGER PRIMARY KEY, name TEXT)")
-	if err != nil {
-		panic(err)
-	}
-	defer stmnt.Close()
-	_, err = stmnt.Exec()
-	if err != nil {
-		panic(err)
+		fmt.Println("Ошибка при создании таблицы chocolate: ", err)
 	}
 }
-func createAdminsTable(db *sql.DB){
-	stmnt, err := db.Prepare("CREATE TABLE IF NOT EXISTS admins (id INTEGER PRIMARY KEY, name TEXT, password TEXT)")
+func createCategoryOfChocolateTable(tx *sql.Tx) {
+	_, err := tx.Exec("CREATE TABLE IF NOT EXISTS categories (id INTEGER PRIMARY KEY, name TEXT)")
 	if err != nil {
-		panic(err)
+		fmt.Println("Ошибка при создании таблицы categories: ", err)
 	}
-	defer stmnt.Close()
-	_, err = stmnt.Exec()
+}
+func createAdminsTable(tx *sql.Tx) {
+	_, err := tx.Exec("CREATE TABLE IF NOT EXISTS admins (id INTEGER PRIMARY KEY, name TEXT, password TEXT)")
 	if err != nil {
-		panic(err)
+		fmt.Println("Ошибка при создании таблицы admins: ", err)
 	}
 }

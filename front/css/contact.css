@@ -27,7 +27,7 @@ body {
   }
   
   nav ul li a {
-    color: #fff; /* White text */
+    color: #ffffff; /* White text */
     text-decoration: none;
     font-weight: bold; /* Bold text */
   }
@@ -60,7 +60,15 @@ body {
     margin: 0 20px;
     flex: 1;
   }
-  
+  .contact-item a{
+    color: #99521f; /* Dark chocolate brown */
+    font-weight: bold;
+    text-decoration: none;
+  }
+  .contact-item a:hover {
+    color: #52301f; /* Richer brown with a hint of orange */
+    text-decoration: underline;
+  }
   .contact-item h3 {
     color: #52301f; /* Dark chocolate brown */
     margin-bottom: 10px;
@@ -70,7 +78,6 @@ body {
     color: #99521f; /* Richer brown with a hint of orange */
     font-weight: bold;
   }
-  
   /* Footer Styles */
   footer {
     background-color: #52301f; /* Dark chocolate brown */

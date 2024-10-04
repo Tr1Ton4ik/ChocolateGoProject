@@ -4,27 +4,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chocolate Internet Shop</title>
+    <title>Магазин Рудневой Ксении</title>
     <link rel="stylesheet" href="/front/css/index.css">
 </head>
 <body>
     <header>
         <nav>
             <ul>
-                <li><a href="/index.html">Home</a></li>
-                <li><a href="#featured-products">Products</a></li>
-                <li><a href="/about.html">About</a></li>
-                <li><a href="/contact.html">Contact</a></li>
-                <li><a href="/cart.html">Cart</a></li>
+                <li><a href="/index">Начальная страница</a></li>
+                <li><a href="#featured-products">Продукция</a></li>
+                <li><a href="/about">Доп информация</a></li>
+                <li><a href="/contact">Контакты</a></li>
+                <li><a href="/cart">Корзина</a></li>
             </ul>
         </nav>
     </header>
 
     <main>
         <section id="hero">
-            <h1>Welcome to Chocolate Internet Shop</h1>
-            <p>Discover the best chocolate products online</p>
-            <a href="#featured-products" class="btn">Shop Now</a>
+            <h1>Добро Пожаловать В Шоколадный Магазин</h1>
+            <h2>Изучайте Шоколадные Товары Прямо На Сайте</h2>
+            <a href="#featured-products" class="btn">Начать покупки</a>
                 <div class="category-links">
                     {{range .Categories}}
                     <span class="category-divider">|</span>
@@ -35,7 +35,7 @@
         </section>
 
         <section id="featured-products">
-            <h2>Our Products</h2>
+            <h3>Наша Продукция</h3>
             <div class="product-grid">
                 {{range .Products}}
                 <div class="product-card">
@@ -43,7 +43,7 @@
                     <h3 class="product-name">{{.Name}}</h3>
                     <p class="product-description">{{.Description}}</p>
                     <p class="product-price">{{.Price}}</p>
-                    <button class="btn add-to-cart" data-name={{.Name}} data-price={{.Price}}>Add to Cart</button>
+                    <button class="btn add-to-cart" data-name={{.Name}} data-price={{.Price}}>В Корзину</button>
                 </div>
                 {{end}}
             </div>

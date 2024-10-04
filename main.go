@@ -7,6 +7,7 @@ import (
 	"chocolateproject/utils/types"
 
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"io"
@@ -66,20 +67,25 @@ filldb - заполнение бд
 	serverMux.Handle(frontPath+"css/", http.StripPrefix(frontPath+"css/", http.FileServer(http.Dir(strings.Trim(frontPath+"css/", "/")))))
 
 	serverMux.HandleFunc("/", mainPageHandler)
-	serverMux.HandleFunc("/cart.html", cartPageHandler)
-	serverMux.HandleFunc("/product.html", productPageHandler)
-	serverMux.HandleFunc("/contact.html", contactPageHanfler)
-	serverMux.HandleFunc("/about.html", aboutPageHandler)
+	serverMux.HandleFunc("/cart", cartPageHandler)
+	serverMux.HandleFunc("/product", productPageHandler)
+	serverMux.HandleFunc("/contact", contactPageHanfler)
+	serverMux.HandleFunc("/about", aboutPageHandler)
 	serverMux.HandleFunc("/admin", adminPageHandler)
 	serverMux.HandleFunc("/login", loginAdminPageHandler)
 	serverMux.HandleFunc("/add_product", addProductHandler)
 	serverMux.HandleFunc("/add_admin", addAdminHandler)
-	//serverMux.HandleFunc("/delete_product", deleteProductHandler)
+	serverMux.HandleFunc("/delete_product", deleteProductHandler)
+	serverMux.HandleFunc("/search_product", searchProductHandler)
 
 	// Запускаем веб-сервер на порту 8080 с нашим serverMux (в прошлых примерах был nil)
 	fmt.Println("Запуск сервера ")
-	fmt.Println("Сервер запущен: http://127.0.0.1:8080")
-	err := http.ListenAndServe(":8080", serverMux)
+	APP_IP := os.Getenv("APP_IP")
+    APP_PORT := os.Getenv("APP_PORT")
+
+	fmt.Println("Сервер запущен: ", APP_IP+":"+APP_PORT)
+	
+	err := http.ListenAndServe(APP_IP+":"+APP_PORT, serverMux)
 	if err != nil {
 		log.Fatal("Ошибка запуска сервера:", err)
 	}
@@ -243,6 +249,8 @@ func addProductHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 func addAdminHandler(w http.ResponseWriter, r *http.Request) {
+	http.Redirect(w, r, "/admin", http.StatusSeeOther)
+
 	r.ParseForm()
 	name, password := r.Form.Get("name"), config.Hash(r.Form.Get("password"))
 
@@ -267,17 +275,85 @@ func addAdminHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 }
-//func deleteProductHandler(w http.ResponseWriter, r *http.Request) {
-//	r.ParseForm()
-//	name, category, password := r.Form.Get("product-name"), r.Form.Get("product-category"), config.Hash(r.Form.Get("password"))
-//	var category_id int
-//	tx, err := db.Begin()
-//	if err != nil {
-//		fmt.Println("Ошибка начала транзакции deleteProductHandler")
-//		return
-//	}
-//
-//}
+
+func deleteProductHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "POST" {
+
+		http.Redirect(w, r, "/admin", http.StatusSeeOther)
+
+		r.ParseForm()
+		name, category := r.Form.Get("name"), r.Form.Get("category")
+		var category_id int
+		tx, err := db.Begin()
+		if err != nil {
+			fmt.Println("Ошибка создания транзакции deleteProductHandler")
+			return
+		}
+
+		rows, _ := tx.Query("SELECT id FROM categories WHERE UPPER(name) = UPPER(?)", category)
+		for rows.Next() {
+			rows.Scan(&category_id)
+			break
+		}
+		for i := 0; i < 2; i++ {
+			_, err := tx.Exec("DELETE FROM chocolate WHERE UPPER(name) = UPPER(?) AND category_id = ?", name, category_id)
+			if err != nil{
+				fmt.Println("Возникли проблема при удалении продукта deleteProductHandler, пробую еще раз")
+				tx.Rollback()
+			}
+		}
+		err = tx.Commit()
+		if err != nil{
+			fmt.Println("Ошибка сохранения изменений deleteProductHandler", err)
+            return
+		}
+		fmt.Println("Продукт", name, "удален из категории", category)
+		http.Redirect(w, r, "/admin", http.StatusSeeOther)
+
+	}
+}
+func searchProductHandler(w http.ResponseWriter, r *http.Request) {
+
+	http.Redirect(w, r, "/admin", http.StatusSeeOther)
+
+	search_name := r.URL.Query().Get("name")
+
+	tx, err := db.Begin()
+	if err != nil {
+		fmt.Println("Ошибка создания транзакции searchProductHandler")
+		return
+	}
+
+	type Product struct {
+		Name     string `json:"name"`
+		Category string `json:"category"`
+	}
+	products := []Product{}
+	var query_name, query_category string
+	var query_category_id int
+
+	fmt.Print("Ищем продукты по имени: ", search_name)
+	rows, _ := tx.Query("SELECT name, category_id FROM chocolate where UPPER(name) LIKE UPPER(? || '%')", search_name)
+	for rows.Next() {
+		rows.Scan(&query_name, &query_category_id)
+		category_rows, _ := tx.Query("SELECT name FROM categories WHERE id = ?", query_category_id)
+		for category_rows.Next() {
+			category_rows.Scan(&query_category)
+			products = append(products, Product{Name: query_name, Category: query_category})
+			break
+		}
+	}
+	fmt.Println()
+	err = tx.Commit()
+	if err != nil {
+		fmt.Println("Ошибка сохранения изменений searchProductHandler")
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(products)
+
+}
 func prepareForMainPage(categoryForFind string, db *sql.DB) AllForMain {
 	var (
 		id, price, category_id           int64
@@ -360,17 +436,13 @@ func fillCategoryDataTable() {
 	if err != nil {
 		fmt.Println("Ошибка начала транзакции fillcategory")
 	}
-	for i := 0; i < 5; i++ {
-		categories := []string{"Шоколадные плитки", "Батончики", "Конфеты", "Мороженое", "Пасты и карамели"}
-		for _, item := range categories {
-			err := addCategory(item, tx)
-			if err != nil {
-				fmt.Println("Ошибка при выполнении операции addcategory, пытаюсь еще раз")
-				tx.Rollback()
-			}
-		if err == nil {
-			break
-		}
+
+	categories := []string{"Шоколадные плитки", "Батончики", "Конфеты", "Мороженое", "Пасты и карамели"}
+	for _, item := range categories {
+		err := addCategory(item, tx)
+		if err != nil {
+			fmt.Println("Ошибка при выполнении операции addcategory, пытаюсь еще раз")
+			tx.Rollback()
 		}
 	}
 	err = tx.Commit()
