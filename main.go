@@ -80,8 +80,8 @@ filldb - заполнение бд
 
 	// Запускаем веб-сервер на порту 8080 с нашим serverMux (в прошлых примерах был nil)
 	fmt.Println("Запуск сервера ")
-	fmt.Println("Сервер запущен: localhost:8080")
-	err := http.ListenAndServe("localhost:8080", serverMux)
+	fmt.Println("Сервер запущен:8080")
+	err := http.ListenAndServe(":8080", serverMux)
 	if err != nil {
 		log.Fatal("Ошибка запуска сервера:", err)
 	}
@@ -477,7 +477,7 @@ func WaitForCommands() {
 		case "filldb":
 			fillAllDatabases()
 		default:
-			fmt.Println("No such command")
+			fmt.Println("No such command", ":", command)
 		}
 	}
 }
